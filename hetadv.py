@@ -1,5 +1,5 @@
 from numpy import arctan, array, random
-from scipy.stats import linregress
+from scipy.stats import linregress, sem
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 
@@ -158,13 +158,13 @@ def simulate(gene_count, rate, gens, num_loops, v):
             else:
                 sim_info.append(gen_info)
 
+    x = []
+    y = []
+    for probability, ratio in enumerate(sim_info):
+        x.append(10*(probability % 11))
+        y.append([100*ratio[-1][2]/(ratio[-1][1] + ratio[-1][2])])
+
     if v == True:
-        x = []
-        y = []
-        for probability, ratio in enumerate(sim_info):
-            x.append(10*(probability % 11))
-            y.append([100*ratio[-1][2]/(ratio[-1][1] + ratio[-1][2])])
-            
         plt.scatter(x, y)
         plt.xlabel("Probability of Natural Selection (%)")
         plt.ylabel("Percent Heterozygous (%)")
@@ -174,9 +174,11 @@ def simulate(gene_count, rate, gens, num_loops, v):
     #### 5) Statistically verify the trend
 
     # average all the values in the scatterplot
+    freqs = []
     t = []
     for i in range(11):
         t.append([])
+        freqs.append([])
 
     for i, data in enumerate(sim_info):
         t[i % 11] += [100*data[-1][2]/(data[-1][1] + data[-1][2])]
@@ -185,16 +187,37 @@ def simulate(gene_count, rate, gens, num_loops, v):
     for avg in t:
         avgs.append(sum(avg)/len(avg))
 
-    return avgs
+    for i, freq in enumerate(y):
+        freqs[i%11].append(freq)
+
+    # error bars
+    e = []
+    for prob in freqs:
+        dst = []
+        for p in prob:
+            dst.append(p[0])
+        e.append(sem(dst, ddof=1))
+
+    return avgs, e
 
 
-def plot(y):
+def plot(y, e):
     x = range(0, 101, 10)
     bl = linregress(x, y)
+
+    if abs(bl[2]) >= 0.1 and abs(bl[2]) < .3:
+        r_lab = "Small "
+    elif abs(bl[2]) >= 0.3 and abs(bl[2]) < .5:
+        r_lab = "Medium "
+    elif abs(bl[2]) >= 0.5:
+        r_lab = "Large "
+    else:
+        r_lab = "No "
+    
     plt.title("Correlation of Averaged Scatter Plot")
-    l1, = plt.plot(x, bl[0] * x + bl[1], label="Averaged Scatter Plot")
-    l2, = plt.plot(x, y, label="Correlation = {}".format(bl[2]))
-    plt.legend([l1, l2], ["Correlation = {}".format(round(bl[2], 1)), "Averaged Scatter Plot"])
+    plt.errorbar(x, y, e, color="blue", ecolor='lightgray', elinewidth=3, label="Correlation = {}".format(round(bl[2], 1)))
+    plt.plot(x, bl[0] * x + bl[1], color="red", label="Averaged Scatter Plot")
+    plt.legend([r_lab+"Correlation = {}".format(round(bl[2], 1)), "Averaged Scatter Plot"])
     plt.xlabel("Probability of Natural Selection (%)")
     plt.ylabel("Percent Heterozygous (%)")
     # draw_figure(plt) #### 3
@@ -208,6 +231,6 @@ while True:
 
     try:
         vars = simulate(int(values[0]), int(values[1]), int(values[2]), int(values[3]), values[4])
-        plot(vars)
+        plot(vars[0], vars[1])
     except:
         window["progbartxt"].Update("Error")
