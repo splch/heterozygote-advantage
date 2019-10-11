@@ -3,10 +3,12 @@ from scipy.stats import linregress, sem
 import matplotlib.pyplot as plt
 import PySimpleGUI as sg
 
+
 layout = [
-    [sg.Text('Heterozygote Advantage Simulation', justification='center', font=("Arial", 24))],    
-    [sg.Text('Spencer Churchill 9/21/2019')],
-    [sg.Frame('Population Features',[[
+    [sg.Text("Heterozygote Advantage Simulation", justification="center", font=("Arial", 24))],    
+    [sg.Text("Spencer Churchill 9/21/2019", tooltip="Hypothesis: The rate of natural selection is\ndirectly proportional to the frequency of heterozygous genes.")],
+
+    [sg.Frame("Population Features",[[
         sg.Text("Genes"),
         sg.Slider(range=(1, 26), orientation='v', size=(5, 20), default_value=3),
         sg.Text("Birth rate"),
@@ -14,25 +16,28 @@ layout = [
         sg.Text("Generations"),
         sg.Slider(range=(1, 100), orientation='v', size=(5, 20), default_value=15)
         ]], relief=sg.RELIEF_SUNKEN)],
+
     [sg.Text("Iterations: "),
     sg.Slider(range=(1, 100), orientation='h', size=(34, 20), default_value=10)],
-    [sg.Frame(layout=[
-    [sg.Checkbox('Verbose output', size=(15, 1))]], title='Options',title_color='red', relief=sg.RELIEF_SUNKEN)],
+
+    [sg.Frame(layout=[[
+        sg.Checkbox("Verbose output", size=(15, 1))]],title="Options", title_color="red", relief=sg.RELIEF_SUNKEN)],
     [sg.ProgressBar(100, orientation='h', size=(38, 15), key="progbar"), sg.Text("", size=(4, 1), key="progbartxt")],
 
     [sg.Submit(button_text="Simulate"), sg.Cancel(button_text="Exit")],
-    # [sg.Canvas(size=(4, 3), key='canvas')], #### 1
+    # [sg.Canvas(size=(4, 3), key="canvas")], #### 1
 ]
 
-window = sg.Window('Heterozygote Advantage', layout, default_element_size=(50, 1), finalize=True, grab_anywhere=False)
+window = sg.Window("Heterozygote Advantage", layout, icon="icon.ico")
 
 # from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, FigureCanvasAgg #### 2
 # from matplotlib.figure import Figure
 # def draw_figure(plt, loc=(0, 0)):
 #     figure_canvas_agg = FigureCanvasTkAgg(plt.gcf(), window["canvas"].TKCanvas)
 #     figure_canvas_agg.draw()
-#     figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
+#     figure_canvas_agg.get_tk_widget().pack(side="top", fill="both", expand=1)
 #     return figure_canvas_agg
+
 
 def simulate(gene_count, rate, gens, num_loops, v):
 
@@ -46,21 +51,19 @@ def simulate(gene_count, rate, gens, num_loops, v):
     sim_info = []
     prog_num = 0
     for itera in range(num_loops):
-
         for simulation in range(11):
 
             prob = simulation/10
-
             gen_info = [] # include info of every generation
-            info = [0, 0, 0, 0, 0] # [population, homozygous, heterozygous, death, catastrophic event]
+            info = [0, 0, 0, 0] # [population, homozygous, heterozygous, death]
 
             for gen in range(gens):
 
-                info = [0, 0, 0, info[3], 0]
+                info = [0, 0, 0, info[3]]
 
                 if gen == 0:
                     # people = [genes, generation, death probability]
-                    people = [[genes, 1, 0], [genes, 1, 0]] # create an inital population of 2 people
+                    people = [[genes, 1, 0], [genes, 1, 0]] # create an inital population of 2 heterozygous people #### IMPORTANT SECTION
                     against = [] # determine natural selection against alleles
 
                 for gene in genes:
@@ -73,8 +76,6 @@ def simulate(gene_count, rate, gens, num_loops, v):
                     if random.random() > 1 - prob: # 1-n chance of natural selection
                         # against = [gene, how much against, number of generations]
                         val = random.random()
-                        if val >= .7:
-                            info[4] += 1
                         if random.randint(2) == 0:
                             against.append(array([gene[0], val, random.randint(5)], dtype=str))
                         else:
@@ -82,12 +83,13 @@ def simulate(gene_count, rate, gens, num_loops, v):
 
                 # check alleles and increase chances of death when matched
                 for i, person in enumerate(people):
-                    person[1] += 1 # increase generation by 1
-                    mort_age = 0.354 * arctan(person[1] - 3.5) + .44 # death probability from age
 
+                    person[1] += 1 # increase generation by 1
+                    mort_age = 0.354 * arctan(person[1] - 3.5) + .44 # death probability from age #### IMPORTANT SECTION
                     mort_nature = 0
                     for pheno in person[0]:
                         for anti in against:
+
                             if ord(pheno[0]) >= 97 and ord(pheno[1]) >= 97: # if gene is monozygous recessive
                                 if anti[0] in pheno:
                                     mort_nature += float(anti[1]) # add anti values to death probability
@@ -104,10 +106,9 @@ def simulate(gene_count, rate, gens, num_loops, v):
                                 if pheno[1] == anti[0]:
                                     mort_nature += float(anti[1])
 
-                    person[2] = (1/gene_count) * mort_nature + (1) * mort_age # ratio death factors
+                    person[2] = (1/gene_count) * mort_nature + (1) * mort_age # ratio death factors #### IMPORTANT SECTION
 
                     if person[2] > random.random() and gen != 0: #don't kill Adam and Eve immediately
-                        # print("Death probability:", person[2])
                         people.pop(i) # person killed by Darwin
                         info[3] += 1
 
@@ -116,6 +117,7 @@ def simulate(gene_count, rate, gens, num_loops, v):
                     for j in range(rate): # each couple has {rate} children
                         select_genes = []
                         for k in range(len(genes)):
+
                             allele_1 = people[i][0][k] # Aa
                             allele_2 = people[i+1][0][k] # Aa
                             punnett = []
@@ -133,10 +135,12 @@ def simulate(gene_count, rate, gens, num_loops, v):
                 total_genes = []
                 for person in people: # print gene distribution
                     for gene in person[0]:
+
                         if ord(gene[0]) > ord(gene[1]): # check if heterozygous
                             a = gene[1]
                             b = gene[0]
                             gene = a + b # combine aA with Aa
+
                         total_genes.append(gene)
 
                 for gene in total_genes:
@@ -147,22 +151,24 @@ def simulate(gene_count, rate, gens, num_loops, v):
 
                 gen_info.append(info)
 
+                # update progress bar
                 prog_num += 1
-                progprob = 100*prog_num/(num_loops*11*gens)
+                progprob = 100 * prog_num / (num_loops * 11 * gens)
                 window["progbar"].UpdateBar(progprob)
                 window["progbartxt"].Update(str(round(progprob))+'%')
 
-            if len(people) == 0:
+            if len(people) > 0:
+                sim_info.append(gen_info)
+            else:
                 window["progbartxt"].Update("Error")
                 return
-            else:
-                sim_info.append(gen_info)
 
+    # Analyze population simulation
     x = []
     y = []
     for probability, ratio in enumerate(sim_info):
-        x.append(10*(probability % 11))
-        y.append([100*ratio[-1][2]/(ratio[-1][1] + ratio[-1][2])])
+        x.append(10 * (probability % 11))
+        y.append([100 * ratio[-1][2] / (ratio[-1][1] + ratio[-1][2])])
 
     if v == True:
         plt.scatter(x, y)
@@ -171,8 +177,7 @@ def simulate(gene_count, rate, gens, num_loops, v):
         plt.title("Heterozygous Genes per Natural Selection")
         plt.show()
 
-    #### 5) Statistically verify the trend
-
+    # Statistically verify the trend
     # average all the values in the scatterplot
     freqs = []
     t = []
@@ -181,11 +186,11 @@ def simulate(gene_count, rate, gens, num_loops, v):
         freqs.append([])
 
     for i, data in enumerate(sim_info):
-        t[i % 11] += [100*data[-1][2]/(data[-1][1] + data[-1][2])]
+        t[i % 11] += [100 * data[-1][2] / (data[-1][1] + data[-1][2])]
 
     avgs = []
     for avg in t:
-        avgs.append(sum(avg)/len(avg))
+        avgs.append(sum(avg) / len(avg))
 
     for i, freq in enumerate(y):
         freqs[i%11].append(freq)
@@ -196,7 +201,7 @@ def simulate(gene_count, rate, gens, num_loops, v):
         dst = []
         for p in prob:
             dst.append(p[0])
-        e.append(sem(dst, ddof=1))
+        e.append(sem(dst, ddof=1)) #### IMPORTANT SECTION
 
     return avgs, e
 
@@ -215,8 +220,8 @@ def plot(y, e):
         r_lab = "No "
     
     plt.title("Correlation of Averaged Scatter Plot")
-    plt.errorbar(x, y, e, color="blue", ecolor='lightgray', elinewidth=3, label="Correlation = {}".format(round(bl[2], 1)))
-    plt.plot(x, bl[0] * x + bl[1], color="red", label="Averaged Scatter Plot")
+    plt.errorbar(x, y, e, color="blue", ecolor="lightgray", elinewidth = 3)
+    plt.plot(x, bl[0] * x + bl[1], color="red")
     plt.legend([r_lab+"Correlation = {}".format(round(bl[2], 1)), "Averaged Scatter Plot"])
     plt.xlabel("Probability of Natural Selection (%)")
     plt.ylabel("Percent Heterozygous (%)")
@@ -226,11 +231,16 @@ def plot(y, e):
 
 while True:
     event, values = window.Read()
+
     if event == "Exit":
         break
 
-    try:
-        vars = simulate(int(values[0]), int(values[1]), int(values[2]), int(values[3]), values[4])
-        plot(vars[0], vars[1])
-    except:
-        window["progbartxt"].Update("Error")
+    else:
+        try:
+            vars = simulate(int(values[0]), int(values[1]), int(values[2]), int(values[3]), values[4])
+            plot(vars[0], vars[1])
+
+            if values[4] == True:
+                sg.Popup("Genes: {}\nBirth rate: {}\nGenerations: {}\nIterations: {}\n\nCorrelation Coefficient: {}".format(values[0], values[1], values[2], values[3], round(linregress(range(0, 101, 10), vars[0])[2], 4)), title="Output")
+        except:
+            window["progbartxt"].Update("Error")
