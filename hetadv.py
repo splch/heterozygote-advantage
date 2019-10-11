@@ -17,12 +17,12 @@ layout = [
         sg.Slider(range=(1, 100), orientation='v', size=(5, 20), default_value=15)
         ]], relief=sg.RELIEF_SUNKEN)],
 
-    [sg.Text("Iterations: "),
+    [sg.Text("Iterations"),
     sg.Slider(range=(1, 100), orientation='h', size=(34, 20), default_value=10)],
 
     [sg.Frame(layout=[[
         sg.Checkbox("Verbose output", size=(15, 1))]],title="Options", title_color="red", relief=sg.RELIEF_SUNKEN)],
-    [sg.ProgressBar(100, orientation='h', size=(38, 15), key="progbar"), sg.Text("", size=(4, 1), key="progbartxt")],
+    [sg.ProgressBar(1000, orientation='h', size=(38, 15), key="progbar"), sg.Text("0%", size=(4, 1), key="progbartxt")],
 
     [sg.Submit(button_text="Simulate"), sg.Cancel(button_text="Exit")],
     # [sg.Canvas(size=(4, 3), key="canvas")], #### 1
@@ -153,14 +153,14 @@ def simulate(gene_count, rate, gens, num_loops, v):
 
                 # update progress bar
                 prog_num += 1
-                progprob = 100 * prog_num / (num_loops * 11 * gens)
-                window["progbar"].UpdateBar(progprob)
-                window["progbartxt"].Update(str(round(progprob))+'%')
+                progprob = 1000 * prog_num / (num_loops * 11 * gens)
+                window.Element("progbar").UpdateBar(progprob)
+                window.Element("progbartxt").Update(str(round(progprob / 10))+'%')
 
             if len(people) > 0:
                 sim_info.append(gen_info)
             else:
-                window["progbartxt"].Update("Error")
+                window.Element("progbartxt").Update("Error")
                 return
 
     # Analyze population simulation
@@ -230,6 +230,7 @@ def plot(y, e):
 
 
 while True:
+
     event, values = window.Read()
 
     if event == "Exit":
@@ -242,5 +243,8 @@ while True:
 
             if values[4] == True:
                 sg.Popup("Genes: {}\nBirth rate: {}\nGenerations: {}\nIterations: {}\n\nCorrelation Coefficient: {}".format(values[0], values[1], values[2], values[3], round(linregress(range(0, 101, 10), vars[0])[2], 4)), title="Output")
+            
+            window.Element("progbar").UpdateBar(0)
+            window.Element("progbartxt").Update("0%")
         except:
-            window["progbartxt"].Update("Error")
+            window.Element("progbartxt").Update("Error")
