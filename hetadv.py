@@ -6,7 +6,7 @@ import PySimpleGUI as sg
 
 layout = [
     [sg.Text("Heterozygote Advantage Simulation", justification="center", font=("Arial", 24))],    
-    [sg.Text("Spencer Churchill 9/21/2019", tooltip="Hypothesis: The rate of natural selection is\ndirectly proportional to the frequency of heterozygous genes.")],
+    [sg.Text("Spencer Churchill 9/20/2019", tooltip="Hypothesis: The rate of natural selection is\ndirectly proportional to the frequency of heterozygous genes.")],
 
     [sg.Frame("Population Features",[[
         sg.Text("Genes"),
@@ -18,7 +18,7 @@ layout = [
         ]], relief=sg.RELIEF_SUNKEN)],
 
     [sg.Text("Iterations"),
-    sg.Slider(range=(1, 100), orientation='h', size=(34, 20), default_value=10)],
+    sg.Slider(range=(1, 100), orientation='h', size=(34, 20), default_value=20)],
 
     [sg.Frame(layout=[[
         sg.Checkbox("Verbose output", size=(15, 1))]],title="Options", title_color="red", relief=sg.RELIEF_SUNKEN)],
@@ -170,40 +170,32 @@ def simulate(gene_count, rate, gens, num_loops, v):
         x.append(10 * (probability % 11))
         y.append([100 * ratio[-1][2] / (ratio[-1][1] + ratio[-1][2])])
 
-    if v == True:
-        plt.scatter(x, y)
-        plt.xlabel("Probability of Natural Selection (%)")
-        plt.ylabel("Percent Heterozygous (%)")
-        plt.title("Heterozygous Genes per Natural Selection")
-        plt.show()
-
     # Statistically verify the trend
     # average all the values in the scatterplot
-    freqs = []
-    t = []
-    for i in range(11):
-        t.append([])
-        freqs.append([])
+    t = [[] for i in range(11)]
 
     for i, data in enumerate(sim_info):
         t[i % 11] += [100 * data[-1][2] / (data[-1][1] + data[-1][2])]
 
     avgs = []
+    e = []
     for avg in t:
         avgs.append(sum(avg) / len(avg))
+        e.append(sem(avg)) # error bars
+    
+    if v == True:
+        print("\n######### VERBOSE #########")
+        for i, avg in enumerate(avgs):
+            print(f"{10*i}%\t{avg}")
+        print("###########################")
 
-    for i, freq in enumerate(y):
-        freqs[i%11].append(freq)
+        plt.title("Heterozygous Genes per Natural Selection")
+        plt.scatter(x, y)
+        plt.xlabel("Probability of Natural Selection (%)")
+        plt.ylabel("Percent Heterozygous (%)")
+        plt.show()
 
-    # error bars
-    e = []
-    for prob in freqs:
-        dst = []
-        for p in prob:
-            dst.append(p[0])
-        e.append(sem(dst, ddof=1)) #### IMPORTANT SECTION
-
-    return avgs, e
+    return [avgs, e]
 
 
 def plot(y, e):
@@ -226,7 +218,7 @@ def plot(y, e):
     plt.xlabel("Probability of Natural Selection (%)")
     plt.ylabel("Percent Heterozygous (%)")
     # draw_figure(plt) #### 3
-    plt.show()
+    plt.show(block=False)
 
 
 while True:
@@ -246,5 +238,6 @@ while True:
             
             window.Element("progbar").UpdateBar(0)
             window.Element("progbartxt").Update("0%")
+
         except:
             window.Element("progbartxt").Update("Error")
