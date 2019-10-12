@@ -220,7 +220,7 @@ def plot(y, e):
         r_lab = "No "
     
     plt.title("Correlation of Averaged Scatter Plot")
-    plt.errorbar(x, y, e, color="blue", ecolor="lightgray", elinewidth = 3)
+    plt.errorbar(x, y, e, color="blue", ecolor="lightgray", elinewidth=3)
     plt.plot(x, bl[0] * x + bl[1], color="red")
     plt.legend([r_lab+"Correlation = {}".format(round(bl[2], 1)), "Averaged Scatter Plot"])
     plt.xlabel("Probability of Natural Selection (%)")
