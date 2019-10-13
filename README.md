@@ -10,7 +10,7 @@ pip install numpy scipy matplotlib pysimplegui
 ```
 
 ## Usage
-<img src="Images/GUI.png">
+<img src="Images/GUI.png" height="400px">
 
 Simply set:
   number of genes,
@@ -21,6 +21,6 @@ Simply set:
 But keep in mind this program is slows exponentially for more generations (especially above 20).
 
 ## Results
-<img src="Images/Figure_1.png">
+<img src="Images/Figure_1.png" height="400px">
 
 Here we can see a strong correlation between increasing natural selection and frequency heterozygous genes.
