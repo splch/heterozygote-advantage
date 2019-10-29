@@ -12,7 +12,8 @@ pip install numpy scipy matplotlib pysimplegui
 ## Usage
 <img src="Images/GUI.png" height="400px">
 
-Run ```bash
+Run
+```bash
 python hetadv.py
 ```
 
