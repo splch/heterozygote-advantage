@@ -12,18 +12,18 @@ pip install numpy scipy matplotlib pysimplegui
 ## Usage
 <img src="Images/GUI.png" height="400px">
 
-Run
+To run application:
 ```bash
 python hetadv.py
 ```
 
-Simply set:
+Then simply set:
   number of genes,
   birth rate,
   generations,
   and iterations
 
-But keep in mind this program is slows exponentially for more generations (especially above 20).
+*Keep in mind this program is slows exponentially for more generations (especially above 20).*
 
 ## Results
 <img src="Images/Figure_1.png" height="400px">
