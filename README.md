@@ -12,6 +12,10 @@ pip install numpy scipy matplotlib pysimplegui
 ## Usage
 <img src="Images/GUI.png" height="400px">
 
+Run ```bash
+python hetadv.py
+```
+
 Simply set:
   number of genes,
   birth rate,
