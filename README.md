@@ -5,6 +5,7 @@ Simulations of populations with varying levels of natural selection to observe r
 The rate of natural selection is directly proportional to the frequency of heterozygous genes.
 
 ## Installation
+[![Run on Repl.it](https://repl.it/badge/github/spencerchurchill/heterozygote-advantage)](https://repl.it/github/spencerchurchill/heterozygote-advantage)
 ```bash
 pip install numpy scipy matplotlib pysimplegui
 ```
