@@ -26,7 +26,7 @@ Then simply set:
   generations,
   and iterations
 
-*Keep in mind this program is slows exponentially for more generations (especially above 20).*
+*Keep in mind this program slows exponentially for more generations (especially above 20).*
 
 ## Results
 <img src="Images/Figure_1.png" height="400px">
