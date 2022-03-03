@@ -6,7 +6,7 @@ The rate of natural selection is directly proportional to the frequency of heter
 
 ## Installation
 
-[![Run on Repl.it](https://repl.it/badge/github/spencerchurchill/heterozygote-advantage)](https://repl.it/github/spencerchurchill/heterozygote-advantage)
+[![Run on Repl.it](https://replit.com/badge/github/splch/heterozygote-advantage)](https://replit.com/github/splch/heterozygote-advantage)
 
 ```bash
 pip install numpy scipy matplotlib pysimplegui
